@@ -1,0 +1,44 @@
+#include <stdlib.h>
+
+int shortestSubarray(int* nums, int numsSize, int k) {
+    // 1. Allocate prefix sum array (size is numsSize + 1)
+    long long* P = (long long*)malloc(sizeof(long long) * (numsSize + 1));
+    P[0] = 0;
+    for (int i = 0; i < numsSize; i++) {
+        P[i + 1] = P[i] + nums[i];
+    }
+
+    // 2. Allocate memory for the deque to store indices
+    int* deque = (int*)malloc(sizeof(int) * (numsSize + 1));
+    int front = 0;
+    int rear = -1;
+
+    int minLen = numsSize + 1; // Initialize with an impossible upper bound
+
+    // 3. Process each prefix sum index
+    for (int i = 0; i <= numsSize; i++) {
+        // Shrink from the front: check if the subarray sum is >= k
+        while (front <= rear && P[i] - P[deque[front]] >= k) {
+            int currentLen = i - deque[front];
+            if (currentLen < minLen) {
+                minLen = currentLen;
+            }
+            front++; // Pop front because this starting index is exhausted
+        }
+
+        // Maintain monotonicity from the back: remove indices with larger/equal prefix sums
+        while (front <= rear && P[i] <= P[deque[rear]]) {
+            rear--;
+        }
+
+        // Push current index onto the deque
+        deque[++rear] = i;
+    }
+
+    // Clean up dynamically allocated memory blocks
+    free(P);
+    free(deque);
+
+    // If minLen wasn't updated, no valid subarray exists
+    return (minLen <= numsSize) ? minLen : -1;
+}
