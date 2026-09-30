@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+int constrainedSubsetSum(int* nums, int numsSize, int k) {
+    // dp array to store max sum ending at each index
+    int* dp = (int*)malloc(numsSize * sizeof(int));
+    
+    // Deque to store indices of the dp array
+    int* deque = (int*)malloc(numsSize * sizeof(int));
+    int head = 0, tail = 0; // Pointers for deque front and back
+    
+    int max_sum = nums[0];
+    
+    for (int i = 0; i < numsSize; i++) {
+        // 1. Remove indices that are out of the window of size k
+        if (head < tail && deque[head] < i - k) {
+            head++;
+        }
+        
+        // 2. Calculate dp[i]
+        // If the max value in our window is positive, add it to nums[i]
+        int max_in_window = (head < tail) ? dp[deque[head]] : 0;
+        dp[i] = nums[i] + MAX(0, max_in_window);
+        
+        // Update the overall maximum sum encountered so far
+        max_sum = MAX(max_sum, dp[i]);
+        
+        // 3. Maintain the monotonic property of the deque (decreasing order of dp values)
+        while (head < tail && dp[deque[tail - 1]] <= dp[i]) {
+            tail--;
+        }
+        
+        // 4. Push the current index onto the deque
+        deque[tail++] = i;
+    }
+    
+    free(dp);
+    free(deque);
+    
+    return max_sum;
+}
