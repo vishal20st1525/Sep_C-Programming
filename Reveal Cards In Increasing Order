@@ -1,0 +1,56 @@
+#include <stdlib.h>
+
+// Standard comparison function for qsort to sort in descending order
+int compareDescending(const void* a, const void* b) {
+    return (*(int*)b - *(int*)a);
+}
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* deckRevealedIncreasing(int* deck, int deckSize, int* returnSize) {
+    *returnSize = deckSize;
+    if (deckSize == 0) return NULL;
+
+    // 1. Sort the cards in descending order
+    qsort(deck, deckSize, sizeof(int), compareDescending);
+
+    // 2. Allocate a circular deque of exact size deckSize
+    int* deque = (int*)malloc(sizeof(int) * deckSize);
+    int front = 0;
+    int rear = 0;
+    int size = 0;
+
+    // 3. Process the largest card first to initialize the deque
+    deque[rear] = deck[0];
+    rear = (rear + 1) % deckSize;
+    size++;
+
+    // 4. Simulate the process in reverse for the remaining cards
+    for (int i = 1; i < deckSize; i++) {
+        // Step A: Move the bottom card of the deck back to the top
+        // Circularly step rear backward to get the last valid element index
+        rear = (rear - 1 + deckSize) % deckSize;
+        int bottomCard = deque[rear];
+        
+        // Circularly step front backward and insert the bottom card at the front
+        front = (front - 1 + deckSize) % deckSize;
+        deque[front] = bottomCard;
+
+        // Step B: Circularly step front backward again and insert the next largest card
+        front = (front - 1 + deckSize) % deckSize;
+        deque[front] = deck[i];
+        
+        // We added one net card to the layout during this iteration cycle
+        size++;
+    }
+
+    // 5. Extract the final ordered deck from the circular configuration bounds
+    int* result = (int*)malloc(sizeof(int) * deckSize);
+    for (int i = 0; i < deckSize; i++) {
+        result[i] = deque[(front + i) % deckSize];
+    }
+
+    free(deque);
+    return result;
+}
