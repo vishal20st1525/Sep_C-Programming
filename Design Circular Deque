@@ -1,0 +1,110 @@
+#include <stdlib.h>
+#include <stdbool.h>
+
+typedef struct {
+    int* data;
+    int front;
+    int rear;
+    int capacity;
+    int size;
+} MyCircularDeque;
+
+// Static internal helper functions to prevent global namespace collisions
+static bool isDequeEmptyInternal(MyCircularDeque* obj) {
+    return obj->size == 0;
+}
+
+static bool isDequeFullInternal(MyCircularDeque* obj) {
+    return obj->size == obj->capacity;
+}
+
+// Initializes the deque with a maximum size of k
+MyCircularDeque* myCircularDequeCreate(int k) {
+    MyCircularDeque* obj = (MyCircularDeque*)malloc(sizeof(MyCircularDeque));
+    obj->data = (int*)malloc(sizeof(int) * k);
+    obj->front = 0;
+    obj->rear = 0; // In a deque, starting both pointers at 0 is easiest
+    obj->capacity = k;
+    obj->size = 0;
+    return obj;
+}
+
+// Adds an item at the front of Deque. Returns true if successful.
+bool myCircularDequeInsertFront(MyCircularDeque* obj, int value) {
+    if (isDequeFullInternal(obj)) {
+        return false;
+    }
+    // Circularly step BACKWARDS to insert at the front
+    obj->front = (obj->front - 1 + obj->capacity) % obj->capacity;
+    obj->data[obj->front] = value;
+    obj->size++;
+    return true;
+}
+
+// Adds an item at the rear of Deque. Returns true if successful.
+bool myCircularDequeInsertLast(MyCircularDeque* obj, int value) {
+    if (isDequeFullInternal(obj)) {
+        return false;
+    }
+    // Store data at current rear position, then step FORWARDS circularly
+    obj->data[obj->rear] = value;
+    obj->rear = (obj->rear + 1) % obj->capacity;
+    obj->size++;
+    return true;
+}
+
+// Deletes an item from the front of Deque. Returns true if successful.
+bool myCircularDequeDeleteFront(MyCircularDeque* obj) {
+    if (isDequeEmptyInternal(obj)) {
+        return false;
+    }
+    // Circularly step FORWARDS to drop front element
+    obj->front = (obj->front + 1) % obj->capacity;
+    obj->size--;
+    return true;
+}
+
+// Deletes an item from the rear of Deque. Returns true if successful.
+bool myCircularDequeDeleteLast(MyCircularDeque* obj) {
+    if (isDequeEmptyInternal(obj)) {
+        return false;
+    }
+    // Circularly step BACKWARDS to drop rear element
+    obj->rear = (obj->rear - 1 + obj->capacity) % obj->capacity;
+    obj->size--;
+    return true;
+}
+
+// Returns the front item from the Deque. Returns -1 if empty.
+int myCircularDequeGetFront(MyCircularDeque* obj) {
+    if (isDequeEmptyInternal(obj)) {
+        return -1;
+    }
+    return obj->data[obj->front];
+}
+
+// Returns the last item from Deque. Returns -1 if empty.
+int myCircularDequeGetRear(MyCircularDeque* obj) {
+    if (isDequeEmptyInternal(obj)) {
+        return -1;
+    }
+    // The actual last element sits one index behind the current structural rear pointer
+    int actualRearIndex = (obj->rear - 1 + obj->capacity) % obj->capacity;
+    return obj->data[actualRearIndex];
+}
+
+// Returns true if the deque is empty
+bool myCircularDequeIsEmpty(MyCircularDeque* obj) {
+    return isDequeEmptyInternal(obj);
+}
+
+// Returns true if the deque is full
+bool myCircularDequeIsFull(MyCircularDeque* obj) {
+    return isDequeFullInternal(obj);
+}
+
+// Frees the allocated memory blocks
+void myCircularDequeFree(MyCircularDeque* obj) {
+    free(obj->data);
+    free(obj);
+}
