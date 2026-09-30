@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+int maxSubarraySumCircular(int* nums, int numsSize) {
+    int totalSum = 0;
+    
+    // Variables for finding maximum subarray sum (Standard Kadane)
+    int maxNormal = nums[0];
+    int currentMax = 0;
+    
+    // Variables for finding minimum subarray sum (Inverted Kadane)
+    int minNormal = nums[0];
+    int currentMin = 0;
+    
+    for (int i = 0; i < numsSize; i++) {
+        totalSum += nums[i];
+        
+        // Standard Kadane to find the max subarray sum
+        currentMax = (nums[i] > currentMax + nums[i]) ? nums[i] : currentMax + nums[i];
+        if (currentMax > maxNormal) {
+            maxNormal = currentMax;
+        }
+        
+        // Inverted Kadane to find the min subarray sum
+        currentMin = (nums[i] < currentMin + nums[i]) ? nums[i] : currentMin + nums[i];
+        if (currentMin < minNormal) {
+            minNormal = currentMin;
+        }
+    }
+    
+    // Special Edge Case: If all numbers are negative, totalSum == minNormal.
+    // In this case, totalSum - minNormal = 0, but an empty subarray is not allowed.
+    // The maximum possible non-empty subarray sum is simply the largest single negative element (maxNormal).
+    if (maxNormal < 0) {
+        return maxNormal;
+    }
+    
+    // Calculate circular maximum and return the absolute largest value
+    int maxCircular = totalSum - minNormal;
+    return (maxNormal > maxCircular) ? maxNormal : maxCircular;
+}
