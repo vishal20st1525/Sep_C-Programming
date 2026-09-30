@@ -1,0 +1,35 @@
+#include <string.h>
+#include <stdlib.h>
+
+char* convert(char* s, int numRows) {
+    int len = strlen(s);
+    
+    // Edge case: if rows <= 1 or the string is shorter than rows, no change is needed
+    if (numRows <= 1 || len <= numRows) {
+        return s;
+    }
+
+    // Allocate memory for the resulting string (+1 for null terminator)
+    char* result = (char*)malloc((len + 1) * sizeof(char));
+    int index = 0;
+    int cycleLen = 2 * numRows - 2;
+
+    // Process row by row
+    for (int r = 0; r < numRows; r++) {
+        for (int i = 0; i + r < len; i += cycleLen) {
+            // Append the character from the vertical column
+            result[index++] = s[i + r];
+            
+            // Append the character from the diagonal (skip first and last rows)
+            if (r != 0 && r != numRows - 1) {
+                int diagonalIndex = i + cycleLen - r;
+                if (diagonalIndex < len) {
+                    result[index++] = s[diagonalIndex];
+                }
+            }
+        }
+    }
+
+    result[index] = '\0'; // Null-terminate the final C-string
+    return result;
+}
