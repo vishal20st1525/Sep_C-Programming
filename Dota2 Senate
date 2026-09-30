@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char* predictPartyVictory(char* senate) {
+    int n = strlen(senate);
+
+    // Allocate array space to simulate queues for Radiant and Dire indices
+    int* radiantQueue = (int*)malloc(sizeof(int) * n);
+    int* direQueue = (int*)malloc(sizeof(int) * n);
+
+    int rFront = 0, rRear = 0;
+    int dFront = 0, dRear = 0;
+
+    // 1. Populate the initial queues with senator indices
+    for (int i = 0; i < n; i++) {
+        if (senate[i] == 'R') {
+            radiantQueue[rRear++] = i;
+        } else {
+            direQueue[dRear++] = i;
+        }
+    }
+
+    // 2. Simulate the round-based voting system
+    // The loop continues until one party completely runs out of active senators
+    while (rFront < rRear && dFront < dRear) {
+        int rIdx = radiantQueue[rFront++];
+        int dIdx = direQueue[dFront++];
+
+        // The senator appearing earlier in the sequence bans the opponent
+        if (rIdx < dIdx) {
+            // Radiant bans Dire. Radiant moves to the next round.
+            radiantQueue[rRear++] = rIdx + n;
+        } else {
+            // Dire bans Radiant. Dire moves to the next round.
+            direQueue[dRear++] = dIdx + n;
+        }
+    }
+
+    // 3. Determine the final victor
+    char* result = (rFront < rRear) ? "Radiant" : "Dire";
+
+    // Clean up allocated dynamic array memory blocks
+    free(radiantQueue);
+    free(direQueue);
+
+    return result;
+}
