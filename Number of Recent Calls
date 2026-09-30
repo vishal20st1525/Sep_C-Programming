@@ -1,0 +1,46 @@
+#include <stdlib.h>
+
+#define MAX_PINGS 10000 // Safe maximum boundary capacity for active calls
+
+typedef struct {
+    int* pings;     // Dynamic array to store timestamps
+    int front;      // Front pointer of the queue
+    int rear;       // Rear pointer of the queue
+    int capacity;   // Total allocated capacity
+} RecentCounter;
+
+// Initializes the counter object
+RecentCounter* recentCounterCreate() {
+    RecentCounter* obj = (RecentCounter*)malloc(sizeof(RecentCounter));
+    obj->pings = (int*)malloc(sizeof(int) * MAX_PINGS);
+    obj->front = 0;
+    obj->rear = 0;
+    obj->capacity = MAX_PINGS;
+    return obj;
+}
+
+// Registers a new ping at time t, removing outdated records
+int recentCounterPing(RecentCounter* obj, int t) {
+    // 1. Add the new timestamp to the back of our queue
+    obj->pings[obj->rear] = t;
+    obj->rear = (obj->rear + 1) % obj->capacity;
+
+    // 2. Remove all pings that fall outside the [t - 3000, t] time frame window
+    int limit = t - 3000;
+    while (obj->front != obj->rear && obj->pings[obj->front] < limit) {
+        obj->front = (obj->front + 1) % obj->capacity;
+    }
+
+    // 3. Return the count of active elements left inside the queue structure
+    if (obj->rear >= obj->front) {
+        return obj->rear - obj->front;
+    } else {
+        return (obj->capacity - obj->front) + obj->rear;
+    }
+}
+
+// Deallocates counter infrastructure blocks
+void recentCounterFree(RecentCounter* obj) {
+    free(obj->pings);
+    free(obj);
+}
