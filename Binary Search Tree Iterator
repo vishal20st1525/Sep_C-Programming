@@ -1,0 +1,63 @@
+#include <stdlib.h>
+#include <stdbool.h>
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+#define MAX_HEIGHT 1000
+
+typedef struct {
+    struct TreeNode** stack;
+    int top;
+} BSTIterator;
+
+// Internal helper function (name choice does not affect the platform template)
+void pushAllLeft(BSTIterator* obj, struct TreeNode* node) {
+    while (node != NULL) {
+        obj->stack[++(obj->top)] = node;
+        node = node->left;
+    }
+}
+
+// 1. Constructor function name matching LeetCode's expected signature
+BSTIterator* bSTIteratorCreate(struct TreeNode* root) {
+    BSTIterator* obj = (BSTIterator*)malloc(sizeof(BSTIterator));
+    obj->stack = (struct TreeNode**)malloc(sizeof(struct TreeNode*) * MAX_HEIGHT);
+    obj->top = -1;
+    pushAllLeft(obj, root);
+    return obj;
+}
+
+// 2. Next function name matching LeetCode's expected signature
+int bSTIteratorNext(BSTIterator* obj) {
+    struct TreeNode* node = obj->stack[(obj->top)--];
+    if (node->right != NULL) {
+        pushAllLeft(obj, node->right);
+    }
+    return node->val;
+}
+
+// 3. HasNext function name matching LeetCode's expected signature
+bool bSTIteratorHasNext(BSTIterator* obj) {
+    return obj->top != -1;
+}
+
+// 4. Free function name matching LeetCode's expected signature
+void bSTIteratorFree(BSTIterator* obj) {
+    free(obj->stack);
+    free(obj);
+}
+
+/**
+ * Your BSTIterator struct will be instantiated and called as such:
+ * BSTIterator* obj = bSTIteratorCreate(root);
+ * int param_1 = bSTIteratorNext(obj);
+ * bool param_2 = bSTIteratorHasNext(obj);
+ * bSTIteratorFree(obj);
+ */
