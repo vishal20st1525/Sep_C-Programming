@@ -1,0 +1,76 @@
+#include <stdlib.h>
+#include <limits.h>
+
+#define INITIAL_CAPACITY 10000
+
+typedef struct {
+    int* data;       // Stack to store values
+    int* minData;    // Stack to store historical minimums
+    int topIndex;    // Pointer index to the top element
+    int capacity;    // Max current memory capacity
+} MinStack;
+
+// Initializes the stack object
+MinStack* minStackCreate() {
+    MinStack* obj = (MinStack*)malloc(sizeof(MinStack));
+    obj->data = (int*)malloc(sizeof(int) * INITIAL_CAPACITY);
+    obj->minData = (int*)malloc(sizeof(int) * INITIAL_CAPACITY);
+    obj->topIndex = -1;
+    obj->capacity = INITIAL_CAPACITY;
+    return obj;
+}
+
+// Pushes the element value onto the stack
+void minStackPush(MinStack* obj, int val) {
+    // Dynamically double the capacity if the stack fills up
+    if (obj->topIndex >= obj->capacity - 1) {
+        obj->capacity *= 2;
+        obj->data = (int*)realloc(obj->data, sizeof(int) * obj->capacity);
+        obj->minData = (int*)realloc(obj->minData, sizeof(int) * obj->capacity);
+    }
+    
+    obj->topIndex++;
+    obj->data[obj->topIndex] = val;
+    
+    // Determine the current minimum
+    if (obj->topIndex == 0) {
+        obj->minData[obj->topIndex] = val;
+    } else {
+        int currentMin = obj->minData[obj->topIndex - 1];
+        obj->minData[obj->topIndex] = (val < currentMin) ? val : currentMin;
+    }
+}
+
+// Removes the element on the top of the stack
+void minStackPop(MinStack* obj) {
+    if (obj->topIndex >= 0) {
+        obj->topIndex--;
+    }
+}
+
+// Gets the top element of the stack
+int minStackTop(MinStack* obj) {
+    return obj->data[obj->topIndex];
+}
+
+// Retrieves the minimum element in the stack
+int minStackGetMin(MinStack* obj) {
+    return obj->minData[obj->topIndex];
+}
+
+// Frees the allocated memory blocks
+void minStackFree(MinStack* obj) {
+    free(obj->data);
+    free(obj->minData);
+    free(obj);
+}
+
+/**
+ * Your MinStack struct will be instantiated and called as such:
+ * MinStack* obj = minStackCreate();
+ * minStackPush(obj, val);
+ * minStackPop(obj);
+ * int param_3 = minStackTop(obj);
+ * int param_4 = minStackGetMin(obj);
+ * minStackFree(obj);
+ */
