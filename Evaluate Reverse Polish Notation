@@ -1,0 +1,41 @@
+#include <stdlib.h>
+#include <string.h>
+
+int evalRPN(char** tokens, int tokensSize) {
+    // A valid RPN expression will never require a stack larger than tokensSize
+    int* stack = (int*)malloc(sizeof(int) * tokensSize);
+    int top = -1;
+
+    for (int i = 0; i < tokensSize; i++) {
+        char* token = tokens[i];
+
+        // Check if the token is an operator
+        // Note: We check strlen because "-" is an operator, but "-5" is a negative number
+        if ((token[0] == '+' || token[0] == '-' || token[0] == '*' || token[0] == '/') && token[1] == '\0') {
+            // Pop the two operands
+            int b = stack[top--]; // Second operand
+            int a = stack[top--]; // First operand
+            int result = 0;
+
+            switch (token[0]) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': result = a / b; break; // C integer division naturally truncates toward zero
+            }
+            
+            // Push the evaluation result back onto the stack
+            stack[++top] = result;
+        } 
+        else {
+            // The token is an operand (integer), convert and push it
+            stack[++top] = atoi(token);
+        }
+    }
+
+    // The final remaining element on the stack is the total expression value
+    int finalResult = stack[top];
+    free(stack);
+    
+    return finalResult;
+}
