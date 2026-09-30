@@ -1,0 +1,28 @@
+int minKBitFlips(int* nums, int numsSize, int k) {
+    // Dynamically allocate the difference array, initialized to 0
+    int* diff = (int*)calloc(numsSize + 1, sizeof(int));
+    if (diff == NULL) return -1; 
+    
+    int ans = 0;
+    int curr_flips = 0;
+    
+    for (int i = 0; i < numsSize; i++) {
+        curr_flips += diff[i];
+        
+        // Check if the current bit is 0 after factoring in active flips
+        if ((nums[i] + curr_flips) % 2 == 0) {
+            // If the window extends past the array boundary, it's impossible
+            if (i + k > numsSize) {
+                free(diff);
+                return -1;
+            }
+            
+            ans++;
+            curr_flips++;
+            diff[i + k] -= 1; // Mark the end of the flip effect
+        }
+    }
+    
+    free(diff);
+    return ans;
+}
