@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+int countStudents(int* students, int studentsSize, int* sandwiches, int sandwichesSize) {
+    // Array to store the count of students preferring 0 (circular) and 1 (square)
+    int preferenceCount[2] = {0};
+    
+    // Count the preferences of all students
+    for (int i = 0; i < studentsSize; i++) {
+        preferenceCount[students[i]]++;
+    }
+    
+    // Iterate through the sandwich stack from top to bottom
+    for (int i = 0; i < sandwichesSize; i++) {
+        int currentSandwich = sandwiches[i];
+        
+        // If no student left wants this type of sandwich, the process terminates
+        if (preferenceCount[currentSandwich] == 0) {
+            // The number of students unable to eat is the number of remaining sandwiches
+            return sandwichesSize - i;
+        }
+        
+        // A student takes the sandwich and leaves
+        preferenceCount[currentSandwich]--;
+    }
+    
+    // All students successfully ate
+    return 0;
+}   // i am not in danger skyler, i am the danger. As  you think i am the one who opens the door and get shot, i am the one who knocks
