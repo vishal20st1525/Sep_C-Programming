@@ -1,0 +1,82 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+// Helper function to check if the stamp matches the target window (including '?' wildcards)
+bool canStamp(char* stamp, int m, char* target, int start) {
+    bool hasCharacterMatch = false;
+    for (int i = 0; i < m; i++) {
+        if (target[start + i] != '?') {
+            if (target[start + i] != stamp[i]) {
+                return false; // Mismatch found
+            }
+            hasCharacterMatch = true; // At least one actual character must match
+        }
+    }
+    // If the entire window is already '?', there's no point stamping it again
+    return hasCharacterMatch;
+}
+
+// Helper function to replace a matched window with '?' wildcards
+int doStamp(char* target, int start, int m) {
+    int count = 0;
+    for (int i = 0; i < m; i++) {
+        if (target[start + i] != '?') {
+            target[start + i] = '?';
+            count++; // Track how many new '?' characters were made
+        }
+    }
+    return count;
+}
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* movesToStamp(char* stamp, char* target, int* returnSize) {
+    int m = strlen(stamp);
+    int n = strlen(target);
+    
+    // Max allowable moves is 10 * n
+    int maxMoves = 10 * n;
+    int* tempMoves = (int*)malloc(sizeof(int) * maxMoves);
+    int moveCount = 0;
+    
+    int totalQuestionMarks = 0;
+    bool totalChanged = true;
+    
+    // Keep trying to stamp until no more changes can be made
+    while (totalQuestionMarks < n && totalChanged) {
+        totalChanged = false;
+        
+        // Scan every possible starting index for the stamp window
+        for (int i = 0; i <= n - m; i++) {
+            if (canStamp(stamp, m, target, i)) {
+                totalQuestionMarks += doStamp(target, i, m);
+                tempMoves[moveCount++] = i;
+                totalChanged = true;
+                
+                // If we've hit the step limit, break early
+                if (moveCount > maxMoves) {
+                    break;
+                }
+            }
+        }
+    }
+    
+    // If we couldn't turn the entire target into '?', it's impossible
+    if (totalQuestionMarks < n) {
+        *returnSize = 0;
+        free(tempMoves);
+        return NULL;
+    }
+    
+    // Since we collected moves backwards, reverse them to get the forward order
+    int* result = (int*)malloc(sizeof(int) * moveCount);
+    *returnSize = moveCount;
+    for (int i = 0; i < moveCount; i++) {
+        result[i] = tempMoves[moveCount - 1 - i];
+    }
+    
+    free(tempMoves);
+    return result;
+}
